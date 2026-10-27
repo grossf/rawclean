@@ -1,6 +1,6 @@
 # rawclean
 
-Removes camera RAW files that have a JPEG copy next to them, from local drives and network shares (NAS).
+Removes camera RAW files from local drives and network shares (NAS), with progress bars for every step.
 
 Files are never deleted directly: they are first moved into a `_rawclean_trash` folder inside the folder you cleaned, keeping the original folder structure. Only `--purge --delete` deletes them for good.
 
@@ -41,14 +41,12 @@ Several folders can be passed at once: `rawclean D:\Photos \\nas\photos -r`.
 | --- | --- |
 | `-r`, `--recursive` | include all subfolders |
 | `--delete` | actually move files (with `--purge`: delete the quarantine) |
-| `--include-orphans` | also remove RAW files that have no JPEG copy |
 | `--purge` | work on `_rawclean_trash` folders instead |
 | `-y`, `--yes` | skip the confirmation question |
 
 ### What gets removed
 
 - RAW files: `cr2 cr3 crw nef nrw arw srf sr2 raf orf rw2 pef srw 3fr iiq` (any letter case). DNG is deliberately not included, because it is often the only copy of a photo.
-- Only if a `jpg`, `jpeg`, `heic` or `heif` file with the same name is in the same folder, unless `--include-orphans` is given.
 - Their sidecar files: `IMG_1.xmp`, `IMG_1.CR2.xmp`, `.pp3`, `.dop`.
 
 Skipped: symlinks and junctions, `$RECYCLE.BIN`, `System Volume Information`, NAS recycle bins and snapshots (`#recycle`, `@Recycle`, `#snapshot`, `.snapshot`, `@Recently-Snapshot`), Synology `@eaDir`, and `_rawclean_trash` itself.

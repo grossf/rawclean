@@ -35,21 +35,21 @@ def photos(tmp_path: Path) -> Path:
 
 
 def test_scan_top_level_only(photos):
-    plan = core.scan(str(photos), recursive=False, include_orphans=False)
-    assert names(plan.raws) == {"IMG_1.CR2", "IMG_2.nef"}
+    plan = core.scan(str(photos), recursive=False)
+    assert names(plan.raws) == {"IMG_1.CR2", "IMG_2.nef", "IMG_3.ARW"}
     assert names(plan.sidecars) == {"IMG_1.xmp", "IMG_2.nef.pp3"}
-    assert names(plan.orphans) == {"IMG_3.ARW"}
+    assert plan.size == 50
 
 
 def test_scan_recursive_skips_system_dirs(photos):
-    plan = core.scan(str(photos), recursive=True, include_orphans=False)
-    assert names(plan.raws) == {"IMG_1.CR2", "IMG_2.nef", "DSC_5.raf", "P6.ORF"}
+    plan = core.scan(str(photos), recursive=True)
+    assert names(plan.raws) == {"IMG_1.CR2", "IMG_2.nef", "IMG_3.ARW", "DSC_5.raf", "P6.ORF"}
 
 
-def test_include_orphans(photos):
-    plan = core.scan(str(photos), recursive=False, include_orphans=True)
-    assert names(plan.raws) == {"IMG_1.CR2", "IMG_2.nef", "IMG_3.ARW"}
-    assert plan.orphans == []
+def test_scan_reports_progress_per_folder(photos):
+    folders = []
+    core.scan(str(photos), recursive=True, on_dir=lambda p: folders.append(p.dirs))
+    assert folders == [1, 2, 3]
 
 
 def test_dry_run_changes_nothing(photos):
@@ -62,8 +62,8 @@ def test_delete_moves_to_quarantine_preserving_structure(photos):
     assert main([str(photos), "-r", "--delete", "--yes"]) == 0
     assert not (photos / "IMG_1.CR2").exists()
     assert not (photos / "IMG_1.xmp").exists()
+    assert not (photos / "IMG_3.ARW").exists()
     assert (photos / "IMG_1.JPG").exists()
-    assert (photos / "IMG_3.ARW").exists()
     [stamp] = (photos / core.QUARANTINE_DIR).iterdir()
     assert (stamp / "IMG_1.CR2").exists()
     assert (stamp / "2020" / "deep" / "P6.ORF").exists()
@@ -71,8 +71,8 @@ def test_delete_moves_to_quarantine_preserving_structure(photos):
 
 def test_second_run_ignores_quarantine(photos):
     main([str(photos), "-r", "--delete", "--yes"])
-    plan = core.scan(str(photos), recursive=True, include_orphans=True)
-    assert names(plan.raws) == {"IMG_3.ARW"}
+    plan = core.scan(str(photos), recursive=True)
+    assert plan.raws == []
 
 
 def test_purge(photos):

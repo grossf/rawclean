@@ -1,10 +1,12 @@
 [project]
 name = "rawclean"
-version = "0.1.0"
-description = "Find and remove camera RAW files that have a JPEG copy, safely via a quarantine folder."
+version = "0.2.0"
+description = "Find and remove camera RAW files, safely via a quarantine folder."
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "rich>=15.0.0",
+]
 
 [project.scripts]
 rawclean = "rawclean.cli:main"
